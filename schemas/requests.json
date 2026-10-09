@@ -1,0 +1,367 @@
+{
+  "tts": {
+    "$defs": {
+      "OutputOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "format": {
+            "default": "wav",
+            "title": "Format",
+            "type": "string"
+          },
+          "sample_rate": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Sample Rate"
+          }
+        },
+        "title": "OutputOptions",
+        "type": "object"
+      },
+      "VoiceSelector": {
+        "additionalProperties": false,
+        "properties": {
+          "alias": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Alias"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Id"
+          }
+        },
+        "title": "VoiceSelector",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "extensions": {
+        "additionalProperties": true,
+        "title": "Extensions",
+        "type": "object"
+      },
+      "guidance_revision": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Guidance Revision"
+      },
+      "instructions": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Instructions"
+      },
+      "language": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Language"
+      },
+      "model": {
+        "default": "default",
+        "title": "Model",
+        "type": "string"
+      },
+      "output": {
+        "$ref": "#/$defs/OutputOptions"
+      },
+      "text": {
+        "minLength": 1,
+        "title": "Text",
+        "type": "string"
+      },
+      "voice": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/VoiceSelector"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    },
+    "required": [
+      "text"
+    ],
+    "title": "SpeechRequest",
+    "type": "object"
+  },
+  "voice_conversion": {
+    "$defs": {
+      "OutputOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "format": {
+            "default": "wav",
+            "title": "Format",
+            "type": "string"
+          },
+          "sample_rate": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Sample Rate"
+          }
+        },
+        "title": "OutputOptions",
+        "type": "object"
+      },
+      "VoiceSelector": {
+        "additionalProperties": false,
+        "properties": {
+          "alias": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Alias"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Id"
+          }
+        },
+        "title": "VoiceSelector",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "extensions": {
+        "additionalProperties": true,
+        "title": "Extensions",
+        "type": "object"
+      },
+      "model": {
+        "default": "default",
+        "title": "Model",
+        "type": "string"
+      },
+      "output": {
+        "$ref": "#/$defs/OutputOptions"
+      },
+      "source_asset_id": {
+        "minLength": 1,
+        "title": "Source Asset Id",
+        "type": "string"
+      },
+      "voice": {
+        "$ref": "#/$defs/VoiceSelector"
+      }
+    },
+    "required": [
+      "source_asset_id",
+      "voice"
+    ],
+    "title": "VoiceConversionRequest",
+    "type": "object"
+  },
+  "voice_design": {
+    "$defs": {
+      "OutputOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "format": {
+            "default": "wav",
+            "title": "Format",
+            "type": "string"
+          },
+          "sample_rate": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Sample Rate"
+          }
+        },
+        "title": "OutputOptions",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "description": {
+        "minLength": 1,
+        "title": "Description",
+        "type": "string"
+      },
+      "extensions": {
+        "additionalProperties": true,
+        "title": "Extensions",
+        "type": "object"
+      },
+      "language": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Language"
+      },
+      "model": {
+        "default": "default",
+        "title": "Model",
+        "type": "string"
+      },
+      "output": {
+        "$ref": "#/$defs/OutputOptions"
+      },
+      "preview_text": {
+        "minLength": 1,
+        "title": "Preview Text",
+        "type": "string"
+      }
+    },
+    "required": [
+      "description",
+      "preview_text"
+    ],
+    "title": "VoiceDesignRequest",
+    "type": "object"
+  },
+  "voice_registration": {
+    "$defs": {
+      "Reference": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "transcript": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Transcript"
+          }
+        },
+        "required": [
+          "asset_id"
+        ],
+        "title": "Reference",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "alias": {
+        "anyOf": [
+          {
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Alias"
+      },
+      "model": {
+        "default": "default",
+        "title": "Model",
+        "type": "string"
+      },
+      "references": {
+        "items": {
+          "$ref": "#/$defs/Reference"
+        },
+        "minItems": 1,
+        "title": "References",
+        "type": "array"
+      }
+    },
+    "required": [
+      "references"
+    ],
+    "title": "VoiceRegistration",
+    "type": "object"
+  }
+}

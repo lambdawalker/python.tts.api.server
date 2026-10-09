@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tts-api-server"
+version = "0.1.0"
+description = "Shared HTTP and MCP server for local text-to-speech adapters"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["fastapi>=0.115,<1", "uvicorn>=0.30,<1", "pydantic>=2.7,<3", "python-multipart>=0.0.20", "soundfile>=0.13,<1", "jsonschema>=4.23,<5", "filelock>=3.16,<4"]
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.26,<2"]
+
+[project.scripts]
+tts-api-server = "tts_api_server.cli:main"
+
+[project.urls]
+Repository = "https://github.com/lambdawalker/python.tts.api.server"
+Specification = "https://github.com/lambdawalker/design.ai/tree/main/tts"
+Client = "https://github.com/lambdawalker/python.tts.api.client"
+
+[dependency-groups]
+dev = ["pytest>=8,<9", "httpx>=0.27,<1", "ruff>=0.9", "build>=1.2", "twine>=6"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tts_api_server"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
