@@ -1,0 +1,35 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.10', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - run: uv sync --frozen --extra mcp
+      - uses: actions/checkout@v4
+        with:
+          repository: lambdawalker/python.tts.api.client
+          ref: 2b9188940eb3d763ab7aeff100cc9af1a0d2a66b
+          path: .client-conformance
+      - run: uv run pytest
+        env:
+          TTS_CLIENT_SOURCE: .client-conformance
+      - run: uv run ruff check src tests scripts
+      - run: uv run ruff format --check src tests scripts
+      - run: uv run python scripts/export_schemas.py --check
+      - run: uv build
+      - run: uv run twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions-python-${{ matrix.python }}
+          path: dist/*
