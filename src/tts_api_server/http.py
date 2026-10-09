@@ -57,8 +57,21 @@ def create_app(adapters: list[Adapter], settings: Settings | None = None, *, ena
         version="1.0",
         lifespan=lifespan,
         responses={
-            status: {"model": ErrorResponse}
-            for status in (400, 401, 403, 404, 409, 410, 413, 422, 429, 503)
+            # Keep the contract independent of Python's HTTPStatus phrases,
+            # which changed for 413 and 422 in Python 3.13.
+            status: {"model": ErrorResponse, "description": description}
+            for status, description in {
+                400: "Bad Request",
+                401: "Unauthorized",
+                403: "Forbidden",
+                404: "Not Found",
+                409: "Conflict",
+                410: "Gone",
+                413: "Request Entity Too Large",
+                422: "Unprocessable Entity",
+                429: "Too Many Requests",
+                503: "Service Unavailable",
+            }.items()
         },
     )
     app.state.service = service
