@@ -19,6 +19,8 @@ from .models import (
     Asset,
     ErrorResponse,
     JobStatus,
+    SessionRequest,
+    SessionResponse,
     SpeechRequest,
     Voice,
     VoiceConversionRequest,
@@ -75,7 +77,7 @@ def create_app(adapters: list[Adapter], settings: Settings | None = None, *, ena
         },
     )
     app.state.service = service
-    app.add_middleware(AccessMiddleware, settings=settings)
+    app.add_middleware(AccessMiddleware, settings=settings, sessions=service.sessions)
 
     @app.exception_handler(DomainError)
     async def domain_error(request, exc):
@@ -109,6 +111,17 @@ def create_app(adapters: list[Adapter], settings: Settings | None = None, *, ena
         if request.headers.get("if-none-match") == etag:
             return Response(status_code=304, headers=headers)
         return JSONResponse(data, headers=headers)
+
+    @app.post("/v1/sessions", response_model=SessionResponse, status_code=201)
+    def create_session(body: SessionRequest | None = None):
+        return JSONResponse(
+            service.sessions.create(), status_code=201, headers={"Cache-Control": "no-store"}
+        )
+
+    @app.delete("/v1/sessions/current", status_code=204)
+    def revoke_session(request: Request):
+        service.sessions.revoke(request.state.caller)
+        return Response(status_code=204, headers={"Cache-Control": "no-store"})
 
     @app.get("/v1/models")
     def models():
@@ -206,6 +219,10 @@ def create_app(adapters: list[Adapter], settings: Settings | None = None, *, ena
             batch = first
             last_heartbeat = asyncio.get_running_loop().time()
             while True:
+                if settings.anonymous_sessions and not await anyio.to_thread.run_sync(
+                    service.sessions.active, owner
+                ):
+                    return
                 for seq, data in batch:
                     cursor = seq
                     encoded = json.dumps(data, ensure_ascii=False)

@@ -20,6 +20,7 @@ STATUS = {
     "asset_expired": 410,
     "upload_too_large": 413,
     "queue_full": 429,
+    "session_limit_reached": 429,
     "model_unavailable": 503,
     "server_unavailable": 503,
     "internal_error": 500,

@@ -9,24 +9,33 @@ caller: ContextVar[str] = ContextVar("tts_caller", default="local")
 
 
 class AccessMiddleware:
-    def __init__(self, app, settings):
-        self.app, self.settings = app, settings
+    def __init__(self, app, settings, sessions):
+        self.app, self.settings, self.sessions = app, settings, sessions
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
         headers = dict(scope.get("headers", []))
         owner = "local"
-        if self.settings.tokens:
+        bootstrap = (
+            self.settings.anonymous_sessions
+            and scope["method"] == "POST"
+            and scope["path"] == "/v1/sessions"
+        )
+        if (self.settings.tokens or self.settings.anonymous_sessions) and not bootstrap:
             authorization = headers.get(b"authorization", b"").decode("latin1")
             supplied = authorization[7:] if authorization.startswith("Bearer ") else ""
-            owner = next(
-                (
-                    v
-                    for k, v in self.settings.tokens.items()
-                    if hmac.compare_digest(k.encode(), supplied.encode())
-                ),
-                None,
+            owner = (
+                self.sessions.authenticate(supplied)
+                if self.settings.anonymous_sessions
+                else next(
+                    (
+                        v
+                        for k, v in self.settings.tokens.items()
+                        if hmac.compare_digest(k.encode(), supplied.encode())
+                    ),
+                    None,
+                )
             )
             if owner is None:
                 response = JSONResponse(
