@@ -8,7 +8,7 @@ The server imports engine code only through explicitly configured adapter factor
 ## Authentication
 
 The CLI defaults to unauthenticated loopback development. In that mode every request
-belongs to caller `local`. To bind elsewhere, configure bearer tokens:
+belongs to caller `local`. To bind elsewhere with authentication, configure bearer tokens:
 
 ```bash
 export TTS_API_TOKENS='{"replace-with-a-strong-secret":"application-a"}'
@@ -80,3 +80,18 @@ container content is inspected rather than trusting filename/MIME. Public APIs d
 accept server paths, remote audio URLs, embeddings or serialized Python objects.
 Decode/resample inside an adapter only when declared, and record transformations.
 There is no built-in ASR, reference editing, automatic model download or voice fallback.
+
+## Token-free LAN access
+
+Explicitly pass `--no-auth` to allow requests without tokens on a network interface:
+
+```bash
+tts-api-server --adapter your_package.adapter:create_adapter --host 0.0.0.0 --no-auth --mcp
+```
+
+This flag overrides `TTS_API_TOKENS`, even if it is set. HTTP, MCP, events and audio
+downloads all use the shared `local` caller. Anyone who can reach the listening port
+can use the API and access that caller's jobs, voices and assets. The flag does not
+restrict connections to private IP addresses; network reachability determines access.
+Remove the flag and configure tokens to restore authentication. Without the flag,
+the existing loopback-only rule for token-free startup still applies.

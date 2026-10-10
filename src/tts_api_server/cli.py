@@ -28,6 +28,11 @@ def build_parser():
     parser.add_argument("--data-dir", type=Path, default=Path(".tts-data"))
     parser.add_argument("--default-model")
     parser.add_argument("--mcp", action="store_true")
+    parser.add_argument(
+        "--no-auth",
+        action="store_true",
+        help="Disable token authentication on any interface; all clients share caller local",
+    )
     parser.add_argument("--max-queue", type=int, default=32)
     parser.add_argument("--max-upload-bytes", type=int, default=32 * 1024 * 1024)
     parser.add_argument("--asset-ttl", type=float, default=86400)
@@ -38,13 +43,16 @@ def build_parser():
 
 
 def settings_from_args(args, environment):
-    tokens = json.loads(environment.get("TTS_API_TOKENS", "{}"))
+    tokens = {} if args.no_auth else json.loads(environment.get("TTS_API_TOKENS", "{}"))
     if not isinstance(tokens, dict) or any(
         not isinstance(k, str) or not isinstance(v, str) for k, v in tokens.items()
     ):
         raise ValueError("TTS_API_TOKENS must map token strings to caller ID strings")
-    if not tokens and args.host not in {"127.0.0.1", "::1", "localhost"}:
-        raise ValueError("Unauthenticated mode requires a loopback host. Set TTS_API_TOKENS.")
+    if not args.no_auth and not tokens and args.host not in {"127.0.0.1", "::1", "localhost"}:
+        raise ValueError(
+            "Unauthenticated mode requires a loopback host. "
+            "Set TTS_API_TOKENS or explicitly use --no-auth."
+        )
     return Settings(
         data_dir=args.data_dir,
         default_model=args.default_model,
