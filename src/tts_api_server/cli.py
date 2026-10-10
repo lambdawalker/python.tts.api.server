@@ -28,7 +28,15 @@ def build_parser():
     parser.add_argument("--data-dir", type=Path, default=Path(".tts-data"))
     parser.add_argument("--default-model")
     parser.add_argument("--mcp", action="store_true")
-    parser.add_argument(
+    auth = parser.add_mutually_exclusive_group()
+    auth.add_argument(
+        "--anonymous-sessions",
+        action="store_true",
+        help="Allow public session creation with isolated bearer credentials",
+    )
+    parser.add_argument("--session-ttl", type=float, default=86400)
+    parser.add_argument("--max-sessions", type=int, default=10000)
+    auth.add_argument(
         "--no-auth",
         action="store_true",
         help="Disable token authentication on any interface; all clients share caller local",
@@ -48,7 +56,12 @@ def settings_from_args(args, environment):
         not isinstance(k, str) or not isinstance(v, str) for k, v in tokens.items()
     ):
         raise ValueError("TTS_API_TOKENS must map token strings to caller ID strings")
-    if not args.no_auth and not tokens and args.host not in {"127.0.0.1", "::1", "localhost"}:
+    if (
+        not args.no_auth
+        and not args.anonymous_sessions
+        and not tokens
+        and args.host not in {"127.0.0.1", "::1", "localhost"}
+    ):
         raise ValueError(
             "Unauthenticated mode requires a loopback host. "
             "Set TTS_API_TOKENS or explicitly use --no-auth."
@@ -63,6 +76,9 @@ def settings_from_args(args, environment):
         event_limit=args.event_limit,
         idempotency_ttl=args.idempotency_ttl,
         tokens=tokens,
+        anonymous_sessions=args.anonymous_sessions,
+        session_ttl=args.session_ttl,
+        max_sessions=args.max_sessions,
     )
 
 

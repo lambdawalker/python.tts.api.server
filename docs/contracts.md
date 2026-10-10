@@ -76,3 +76,12 @@ references; it does not fine-tune or synthesize. Upload references over HTTP fir
 Domain failures use `isError=true` with the same structured error payload. Essential
 constraints are in tool schemas; full model guidance is retrieved on demand. MCP tools
 call Service in-process, not the public HTTP API.
+
+## Anonymous sessions
+
+In `--anonymous-sessions` mode, unauthenticated `POST /v1/sessions` (empty body or `{}`)
+returns 201 with `session_id`, secret `access_token`, `token_type: "Bearer"` and ISO
+`expires_at`. Responses carry `Cache-Control: no-store`. All other requests require
+that bearer token, including `/mcp`. `DELETE /v1/sessions/current` returns 204 and
+revokes the current session. Unknown/expired/revoked tokens receive 401; cross-session
+resources return the existing not-found errors. Session IDs are not credentials.

@@ -22,6 +22,7 @@ from .adapter import Adapter, ExecutionContext
 from .assets import inspect_audio, timestamp, write_asset
 from .errors import DomainError, validation_error
 from .models import REQUESTS, Voice, VoiceRegistration
+from .sessions import Sessions
 from .store import Store
 
 log = logging.getLogger(__name__)
@@ -40,12 +41,19 @@ class Settings:
     event_ttl: float = 86400
     event_limit: int = 1000
     idempotency_ttl: float = 86400
+    anonymous_sessions: bool = False
+    session_ttl: float = 86400
+    max_sessions: int = 10000
     tokens: dict[str, str] = field(default_factory=dict, repr=False)
     clock: Callable[[], float] = time.time
 
     def __post_init__(self):
         self.data_dir = Path(self.data_dir)
+        if self.anonymous_sessions and self.tokens:
+            raise ValueError("Anonymous sessions cannot be combined with static tokens")
         for name in (
+            "session_ttl",
+            "max_sessions",
             "max_queue",
             "max_upload_bytes",
             "max_request_bytes",
@@ -80,6 +88,7 @@ class Service:
         if self.default not in self.registry:
             raise ValueError("Configured default model is not registered")
         self.store = Store(settings.data_dir)
+        self.sessions = Sessions(self.store, self.lock, settings)
         self.directory = settings.data_dir / "assets"
         self.thread = None
         self.stopping = False
@@ -646,6 +655,7 @@ class Service:
             "DELETE FROM events WHERE created<?", (now - self.settings.event_ttl,)
         )
         self.store.db.execute("DELETE FROM idempotency WHERE expires<=?", (now,))
+        self.store.db.execute("DELETE FROM sessions WHERE expires<=?", (now,))
 
     def close(self):
         with self.wake:

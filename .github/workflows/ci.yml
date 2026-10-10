@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: lambdawalker/python.tts.api.client
-          ref: 2b9188940eb3d763ab7aeff100cc9af1a0d2a66b
+          ref: f82cd3e2546e58eb419a9e0e8a79ab398fc6a24b
           path: .client-conformance
       - run: uv run pytest
         env:

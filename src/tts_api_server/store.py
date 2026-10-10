@@ -11,7 +11,7 @@ from filelock import FileLock, Timeout
 class Store:
     def __init__(self, directory: Path):
         directory.mkdir(parents=True, exist_ok=True)
-        self.lock = FileLock(str(directory / "server.lock"))
+        self.lock = FileLock(str(directory / "server.lock"), thread_local=False)
         try:
             self.lock.acquire(timeout=0)
         except Timeout as exc:
@@ -22,6 +22,9 @@ class Store:
         self.db.execute("PRAGMA journal_mode=WAL")
         self.db.execute("PRAGMA synchronous=FULL")
         self.db.executescript("""
+            CREATE TABLE IF NOT EXISTS sessions (
+                token_hash TEXT PRIMARY KEY, id TEXT NOT NULL UNIQUE, expires REAL NOT NULL);
+            CREATE INDEX IF NOT EXISTS sessions_expiry ON sessions(expires);
             CREATE TABLE IF NOT EXISTS objects (
                 kind TEXT NOT NULL, id TEXT NOT NULL, owner TEXT NOT NULL, data TEXT NOT NULL,
                 PRIMARY KEY(kind,id));

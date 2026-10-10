@@ -95,3 +95,26 @@ can use the API and access that caller's jobs, voices and assets. The flag does 
 restrict connections to private IP addresses; network reachability determines access.
 Remove the flag and configure tokens to restore authentication. Without the flag,
 the existing loopback-only rule for token-free startup still applies.
+
+## Anonymous sessions
+
+Run with `--anonymous-sessions` for public admission with isolated resources:
+
+```bash
+tts-api-server --adapter your_package.adapter:create_adapter --host 0.0.0.0 --anonymous-sessions --mcp
+```
+
+Unset `TTS_API_TOKENS` in this mode. It cannot be combined with `--no-auth` or static
+tokens. POST `/v1/sessions` without credentials, then send the returned `access_token`
+as a bearer credential on all other HTTP/MCP requests. DELETE `/v1/sessions/current`
+revokes that credential. The token is returned only at creation; save it privately
+if you need to resume after a client restart. Only token hashes are stored server-side.
+
+`--session-ttl` sets an absolute lifetime in seconds (default 86400).
+`--max-sessions` limits active sessions (default 10000); admission at capacity returns
+429. Restarting the server preserves unexpired sessions. Expiration/revocation prevents
+new requests and closes job SSE, but does not cancel accepted jobs or ongoing downloads.
+All jobs, voices, assets and idempotency keys are scoped to the session. Losing the token
+or letting it expire loses access; a newly created session cannot recover old resources.
+
+See the [central session contract](https://github.com/lambdawalker/design.ai/blob/docs/tts-implementation-sources/tts/sessions.md).

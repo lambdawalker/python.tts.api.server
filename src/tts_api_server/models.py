@@ -139,3 +139,14 @@ REQUESTS = {
     "voice_design": VoiceDesignRequest,
     "voice_conversion": VoiceConversionRequest,
 }
+
+
+class SessionRequest(Request):
+    """Session creation accepts no caller-selected identity or lifetime."""
+
+
+class SessionResponse(BaseModel):
+    session_id: str
+    access_token: str = Field(repr=False)
+    token_type: Literal["Bearer"] = "Bearer"
+    expires_at: str
